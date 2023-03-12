@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+        
+        <!-- Title -->
+        <title> Unir-se a chat - MyChat </title>
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="./resources/css/style.css">
+
+        <!-- TailwindCSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- JQuery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
+        <!-- Socket.io -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    </head>
+    <body class="h-screen">
+        <main class="flex justify-center h-[calc(100%-2.5rem)] items-center bg-slate-900">
+            <div class="flex flex-col justify-center">
+                <div class="mb-4">
+                    <h1 class="flex justify-center items-center gap-2 text-center text-white mb-3 font-sans text-3xl">
+                        <img src="./resources/images/chat.png" class="h-8 w-8" />
+                        MyChat 
+                    </h1>
+                    <p class="text-white"> Projeto desenvolvido com Node.js e Socket.io </p>
+                </div>
+                
+                <form class="flex flex-col" id="nameForm">
+                    <div>
+                        <label class="sr-only" for="name"> Nome </label>
+                        <input class="border w-full rounded-sm px-2 py-1 focus:outline focus:outline-offset-2 focus:outline-cyan-500" id="name" type="text" name="name" placeholder="Nome" required />
+                    </div>
+                    <div>
+                        <button type="submit" class="btn w-full bg-slate-800 mt-4 hover:bg-cyan-900 font-medium"> Entrar no chat </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+        <footer class="flex justify-center items-center text-white h-10 bg-slate-800 py-3">
+            <p class="text-sm"> Feito por Thiago Ferreira </p>
+        </footer>
+    </body>
+
+    <script type="text/javascript">
+        if (sessionStorage.getItem('username')) {
+            window.location.href = "/chat.html";
+        }
+
+        $('#nameForm').submit( function (event) {
+            event.preventDefault();
+            let username = $('input[name=name]').val();
+
+            sessionStorage.setItem('username', username);
+            window.location.href = "/chat.html";
+        })
+    </script>
+</html>

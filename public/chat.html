@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+        
+        <!-- Title -->
+        <title> Main Chat - MyChat </title>
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="./resources/css/style.css">
+
+        <!-- TailwindCSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Jquery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <!-- Socket.io -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    </head>
+    <body class="h-screen bg-slate-900">
+        <main>
+            <section class="flex flex-col mx-auto px-6 container min-h-[calc(100vh-2.5rem)] text-white lg:px-0">
+                <div class="mt-10 flex justify-between">
+                    <h1 class="text-2xl flex gap-2 justify-center"> <img src="./resources/images/chat.png" class="h-8 w-8" /> MyChat </h1>
+                    <div>
+                        <button id="disconnectChat" class="text-xs border border-red-500 px-3 py-1.5 rounded-sm lg:p-2 lg:text-sm transition duration-300 hover:bg-red-500"> 
+                            Desconectar da sala 
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div>
+                        <h2 class="text-base lg:text-2xl">
+                            Seja bem-vindo(a) <span class="text-sky-400" id="welcomeUsername"></span> ao chat principal...
+                        </h2>
+                        <p class="text-sm mt-2 lg:text-base lg:mt-0"> Não perca tempo e deixa sua mensagem para a comunidade!</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 px-0 lg:px-5" id="chat"></div>
+
+                <form id="chatForm" class="flex items-center gap-2 mb-7">
+                    <div class="w-full">
+                        <label class="sr-only" for="textMessage"> Digite sua mensagem aqui... </label>
+                        <input 
+                            class="text-black text-sm border-0 w-full rounded-sm px-2 py-2 focus:outline focus:outline-offset-2 focus:outline-cyan-500" 
+                            id="textMessage" type="text" name="message" placeholder="Digite sua mensagem aqui..." required 
+                        />
+                    </div>
+
+                    <button type="submit" class="flex justify-center text-sm items-center gap-1 p-2 px-2 lg:text-base lg:px-10 rounded-sm bg-slate-800 py hover:opacity-90">
+                        Enviar
+
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" style="margin-top: 1px">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>                          
+                    </button>
+                </form>
+
+            </section>
+        </main>
+        <footer class="flex justify-center items-center text-white h-10 bg-slate-800">
+            <p class="text-sm"> Feito por Thiago Ferreira </p>
+        </footer>
+
+        <script type="text/javascript">
+            let username;
+            let socket = io('http://localhost:3000/');
+
+            socket.on('receivedMessage', function (message){
+                renderMessage(message);
+            });
+
+            socket.on('previousMessages', function (messages){
+                for (message of messages) {
+                    renderMessage(message);
+                }
+            });
+
+            // Verify if username is defined, otherwise i'll redirect user to index.html
+            if (sessionStorage.getItem('username') == undefined) {
+                window.location.href = "/";
+            } else {
+                username = sessionStorage.getItem('username');
+                $('#welcomeUsername').text(username);
+            }
+
+            // Disconnect user
+            $("#disconnectChat").click(function () {
+                sessionStorage.removeItem('username');
+                window.location.href = "/";
+            });
+
+            // Render new message in chat
+            function renderMessage(message) {
+                let date = message.time.toLocaleString();
+
+                let divMessage = ` 
+                <div class="flex gap-3 mb-7">
+                    <img src="./resources/images/user.png" class="h-7 w-7" />
+                    <div>
+                        <h2 class="text-sm flex lg:text-base" style="gap: 5px"> ${message.username} <span class="text-xs text-gray-500 lg:text-base" style="font-size: 8.5px"> ${date} </span> </h2>
+                        <p class="text-sm text-gray-400"> ${message.message} </p>
+                    </div>
+                </div>`;
+
+                $('#chat').append(divMessage);
+            }
+
+            // Submit message
+            $('#chatForm').submit( function (event) {
+                event.preventDefault();
+
+                let message = $("#textMessage").val();
+
+                if (message.length > 0) {
+                    let messageObject = {
+                        username: username,
+                        message: message,
+                        time: new Date(),
+                    }
+
+                    renderMessage(messageObject);
+                    socket.emit('sendMessage', messageObject);
+
+                    $("#textMessage").val(''); // clean input
+                }
+            });
+
+        </script>
+    </body>
+</html>
